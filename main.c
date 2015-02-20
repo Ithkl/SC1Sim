@@ -138,10 +138,132 @@ int main() {
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setSWRegFlags(cpu);
 			break;
+
+		case LDB:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			immed5 = decodeImmed5(cpu->ir);
+
+			ldb(rd_loc, ra_loc, immed5, cpu, memory);
+			break;
+		case LDW:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			immed5 = decodeImmed5(cpu->ir);
+
+			ldw(rd_loc, ra_loc, immed5, cpu, memory);
+			break;
+		case LDBR:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			rx_loc = decodeRxAndImmd3(cpu->ir);
+
+			ldbr(rd_loc, ra_loc, rx_loc, cpu, memory);
+			break;
+		case LDWR:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			rx_loc = decodeRxAndImmd3(cpu->ir);
+
+			ldwr(rd_loc, ra_loc, rx_loc, cpu, memory);
+			break;
+		case LDI:
+			rd_loc = decodeRd(cpu->ir);
+			immed8 = decodeImmed8(cpu->ir);
+
+			ldi(rd_loc, immed8, cpu);
+			break;
+		case LEA:
+			rd_loc = decodeRd(cpu->ir);
+			immed8 = decodeImmed8(cpu->ir);
+
+			lea(rd_loc, immed8, cpu, memory);
+			break;
+		case MOV:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+
+			mov(rd_loc, ra_loc, cpu);
+			break;
+		case STB:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			immed5 = decodeImmed5(cpu->ir);
+
+			stb(rd_loc, ra_loc, immed5, cpu, memory);
+			break;
+		case STW:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			immed5 = decodeImmed5(cpu->ir);
+
+			stb(rd_loc, ra_loc, immed5, cpu, memory);
+			break;
+		case STBR:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			rx_loc = decodeRxAndImmd3(cpu->ir);
+
+			stbr(rd_loc, ra_loc, rx_loc, cpu, memory);
+			break;
+		case STWR:
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			rx_loc = decodeRxAndImmd3(cpu->ir);
+
+			stwr(rd_loc, ra_loc, rx_loc, cpu, memory);
+			break;
+		case BR:
+			immed8 = decodeImmed8(cpu->ir);
+
+			br(immed8, cpu);
+			break;
+		case BRN:
+			immed8 = decodeImmed8(cpu->ir);
+
+			brN(immed8, cpu);
+			break;
+		case BRZ:
+			immed8 = decodeImmed8(cpu->ir);
+
+			brZ(immed8, cpu);
+			break;
+		case BRC:
+			immed8 = decodeImmed8(cpu->ir);
+
+			brC(immed8, cpu);
+			break;
+		case BRO:
+			immed8 = decodeImmed8(cpu->ir);
+
+			//TODO brO call here.
+			break;
+		case JMP:
+			rx_loc = decodeRxAndImmd3(cpu->ir);
+
+			//TODO jmp call.
+			break;
+		case RET:
+				//Get the argument bit
+				//if (argument bit) {}
+				//do traps
+				//else ret
+			break;
+		case PUSH:
+			//decode for push
+			//call push
+			break;
+		case POP:
+			//decode pop
+			//call pop
+			break;
 		default:
 			break;
 		}
 	}
+	printf("Press any key to finish");
+	getchar();
+	getchar();
 	return EXIT_SUCCESS;
 }
 

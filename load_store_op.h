@@ -28,6 +28,8 @@
 #define JMP 0x000E
 #define JSR 0x000F
 #define RET 0x001B
+#define PUSH 0x001C
+#define POP 0x001D
 
 //load and store functions
 void ldb(int rd_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p memory);
@@ -41,9 +43,9 @@ void stb(int rs_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p 
 void stw(int rs_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p memory);
 void stbr(int rs_location, int ra_location, int rx_location, CPU_p cpu, Memory_p memory);
 void br(int pc_location, CPU_p cpu);
-void BRn(int pc_location, CPU_p cpu);
-void BRz(int pc_location, CPU_p cpu);
-void BRc(int pc_location, CPU_p cpu);
+void brN(int pc_location, CPU_p cpu);
+void brZ(int pc_location, CPU_p cpu);
+void brC(int pc_location, CPU_p cpu);
 
 fetch(CPU_p cpu, Memory_p);
 //helper functions

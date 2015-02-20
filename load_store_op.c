@@ -129,7 +129,7 @@ void br(int pc_location, CPU_p cpu) {
 	cpu->pc += pc_location;
 }
 
-void BRn(int pc_location, CPU_p cpu) {
+void brN(int pc_location, CPU_p cpu) {
 	//Gets the negative flag value.
 	int negative = cpu->sw & 0x8000;
 	//Checks to see if value is 1.
@@ -139,7 +139,7 @@ void BRn(int pc_location, CPU_p cpu) {
 	}
 }
 
-void BRz(int pc_location, CPU_p cpu) {
+void brZ(int pc_location, CPU_p cpu) {
 	//Gets the zero flag value.
 	int zero = cpu->sw & 0x4000;
 	//Checks to see if value is 1.
@@ -149,7 +149,7 @@ void BRz(int pc_location, CPU_p cpu) {
 	}
 }
 
-void BRc(int pc_location, CPU_p cpu) {
+void brC(int pc_location, CPU_p cpu) {
 	//Gets the carry flag value.
 	int carry = cpu->sw & 0x2000;
 	//Checks to see if value is 1.
@@ -158,6 +158,7 @@ void BRc(int pc_location, CPU_p cpu) {
 		cpu->pc += pc_location;
 	}
 }
+
 
 fetch(CPU_p cpu, Memory_p memory){
 
