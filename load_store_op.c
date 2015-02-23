@@ -159,6 +159,16 @@ void brC(int pc_location, CPU_p cpu) {
 	}
 }
 
+void brO(int pc_location, CPU_p cpu) {
+	//Gets the carry flag value.
+	int carry = cpu->sw & 0x1000;
+	//Checks to see if value is 1.
+	if (carry) {
+		//Adds the opcode for the branch location to the current pc location.
+		cpu->pc += pc_location;
+	}
+}
+
 
 fetch(CPU_p cpu, Memory_p memory){
 

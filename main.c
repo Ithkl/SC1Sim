@@ -5,6 +5,7 @@
 #include "cpu_model.h"
 #include "mem_model.h"
 #include "load_store_op.h"
+#include "jumps_model.h"
 
 #define PROGRAM_START_LOCATION 0x0000;
 
@@ -18,6 +19,7 @@ int main() {
 	//memTest();
 	//cpu_mem_pipeline_test();
 	//load_store_test();
+	//jump_test();
 	CPU_p cpu = createCPU();
 	Memory_p memory = createMemory();
 	cpu->pc = PROGRAM_START_LOCATION;
@@ -235,35 +237,53 @@ int main() {
 			break;
 		case BRO:
 			immed8 = decodeImmed8(cpu->ir);
-
-			//TODO brO call here.
+			brO(immed8, cpu);
 			break;
 		case JMP:
 			rx_loc = decodeRxAndImmd3(cpu->ir);
 
-			//TODO jmp call.
+			void jmp(int rx_location, CPU_p cpu, Memory_p memory);
 			break;
 		case RET:
 				//Get the argument bit
-				//if (argument bit) {}
-				//do traps
-				//else ret
+				if (decodeArgument2(cpu->ir)) {
+					switch (decodeImmed10(cpu->ir)) {
+					case 23:
+						halt = 1;
+					default:
+						break;
+					}
+				}
+				else {
+					ret(cpu, memory);
+				}
+				
+				
 			break;
 		case PUSH:
-			//decode for push
-			//call push
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			push(rd_loc, ra_loc, cpu, memory);
 			break;
 		case POP:
-			//decode pop
-			//call pop
+			rd_loc = decodeRd(cpu->ir);
+			ra_loc = decodeRa(cpu->ir);
+			pop(rd_loc, ra_loc, cpu, memory);
 			break;
 		default:
 			break;
 		}
 	}
+	printRegisterFile(&(cpu->rf));
+	printMemory(memory);
 	printf("Press any key to finish");
 	getchar();
 	getchar();
+
+	free(memory);
+	memory = NULL;
+	free(cpu);
+	cpu = NULL;
 	return EXIT_SUCCESS;
 }
 
@@ -412,6 +432,7 @@ load_store_test()
 {
 	Memory_p memory = createMemory();
 	CPU_p cpu = createCPU();
+	//Loading memory
 	setMemoryValue(memory, 3, 0xed);
 	setMemoryValue(memory, 4, 0xfe);
 	setMemoryValue(memory, 12, 0xcd);
@@ -420,12 +441,13 @@ load_store_test()
 	printMemory(memory);
 
 	clearRegisterFile(&cpu->rf);
-
+	//putting memory pointers into memory
 	ldi(4,5,cpu);
 	ldi(5, 10, cpu);
 	ldi(6, 2, cpu);
-
+	//load into register zero the memory at 3
 	ldb(0, 4, -2, cpu, memory);
+	//load into register one the memory at 3
 	ldw(1, 4, -2, cpu, memory);
 
 	ldbr(2, 5, 6, cpu, memory);
@@ -440,4 +462,77 @@ load_store_test()
 	memory = NULL;
 	free(cpu);
 	cpu = NULL;
+}
+
+int jumps_test() {
+	Memory_p memory = createMemory();
+	CPU_p cpu = createCPU();
+
+	clearRegisterFile(&cpu->rf);
+
+	printf("ldi(0,10,cpu)\n");
+	ldi(0, 10, cpu);
+	printf("ldi(1,1,cpu)\n");
+	ldi(1, 1, cpu);
+	printf("push(0,1,cpu,memory)\n");
+	push(1, 0, cpu, memory);
+	printf("ldi(1,2,cpu)\n");
+	ldi(1, 2, cpu);
+	printf("push(0,1,cpu,memory)\n");
+	push(1, 0, cpu, memory);
+	printf("ldi(1,3,cpu)\n");
+	ldi(1, 3, cpu);
+	printf("push(0,1,cpu,memory)\n");
+	push(1, 0, cpu, memory);
+
+	printf("\n");
+	printMemory(memory);
+	printf("\n");
+
+	setMemoryValue(memory, 6, 4);
+	setMemoryValue(memory, 8, 5);
+	setMemoryValue(memory, 10, 6);
+
+	printf("\n");
+	printMemory(memory);
+	printf("\n");
+
+	printf("R0: %04X\n", getRegisterValue(&(cpu->rf), 0));
+	printf("R1: %04X\n", getRegisterValue(&(cpu->rf), 1));
+	//printRegisterFile(&(cpu->rf));
+
+	printf("ldi(1,0,cpu)\n");
+	ldi(1, 0, cpu);
+	printf("R0: %04X\n", getRegisterValue(&(cpu->rf), 0));
+	printf("R1: %04X\n", getRegisterValue(&(cpu->rf), 1));
+	//printRegisterFile(&(cpu->rf));
+
+	printf("pop(1, 0, cpu, memory)\n");
+	pop(1, 0, cpu, memory);
+	printf("R0: %04X\n", getRegisterValue(&(cpu->rf), 0));
+	printf("R1: %04X\n", getRegisterValue(&(cpu->rf), 1));
+	//printRegisterFile(&(cpu->rf));
+
+	printf("pop(1, 0, cpu, memory)\n");
+	pop(1, 0, cpu, memory);
+	printf("R0: %04X\n", getRegisterValue(&(cpu->rf), 0));
+	printf("R1: %04X\n", getRegisterValue(&(cpu->rf), 1));
+	//printRegisterFile(&(cpu->rf));
+
+	printf("pop(0, 1, cpu, memory)\n");
+	pop(1, 0, cpu, memory);
+	//printf("ldw(1, 0, cpu, memory)\n");
+	//ldw(1, 0, 0, cpu, memory);
+	printf("R0: %04X\n", getRegisterValue(&(cpu->rf), 0));
+	printf("R1: %04X\n", getRegisterValue(&(cpu->rf), 1));
+	//printRegisterFile(&(cpu->rf));
+
+	getchar();
+	getchar();
+
+	free(memory);
+	memory = NULL;
+	free(cpu);
+	cpu = NULL;
+	return 0;
 }

@@ -286,8 +286,17 @@ int decodeImmed5(Register ir){
 	return ir & IMMED5_MASK;
 }
 
+//For use with SHL and SHR
 int decodeArgument1(Register ir){
 	return ir & ARGS1_MASK;
+}
+//For use with TRAP and RET
+int decodeArgument2(Register ir){
+	return ir & ARGS2_MASK;
+}
+
+int decodeImmed10(Register ir){
+	return ir & IMMED10_MASK;
 }
 
 void loadAandBReg(ALU_p alu, Register a, Register b) {

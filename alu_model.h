@@ -30,6 +30,8 @@ Continued by Jackson Hubert and James Nance
 #define REGISTER_MASK 0x0007
 #define IMMED5_MASK 0x001F
 #define ARGS1_MASK 0x0003
+#define ARGS2_MASK 0x0400
+#define IMMED10_MASK 0x03FF
 
 #define CARRY_TEST 0x4000
 #define SIGN_BIT_TEST 0x8000
@@ -65,6 +67,8 @@ int decodeRa(Register ir);
 int decodeRxAndImmd3(Register ir);
 int decodeImmed5(Register ir);
 int decodeArgument1(Register ir);
+int decodeArgument2(Register ir);
+int decodeImmed10(Register ir);
 
 void loadAandBReg(ALU_p alu, Register a, Register b);
 
