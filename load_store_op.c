@@ -108,18 +108,20 @@ void stbr(int rs_location, int ra_location, int rx_location, CPU_p cpu, Memory_p
 	//Load mdr with the low order byte
 	cpu->mdr = low_order_byte;
 	//Load mar with the value of ra plus rx
-	cpu->mar = getRegisterValue(&(cpu->rf), ra_location) + getRegisterValue(&(cpu->rf), rx_location);
+	cpu->mar = getRegisterValue(&(cpu->rf), ra_location) + (signed)getRegisterValue(&(cpu->rf), rx_location);
 	//Set the memory at the address stored in mar with the byte stored in mdr
 	setMemoryValue(memory, cpu->mar, cpu->mdr);
 }
 
 void stwr(int rs_location, int ra_location, int rx_location, CPU_p cpu, Memory_p memory){
+        //store the lob mask.
+        stbr(rs_location, ra_location, rx_location, cpu, memory);
 	//Create an unsigned char that is the high order byte of the contents of the register.
-	unsigned char high_order_byte = getRegisterValue(&(cpu->rf), rs_location);
+	unsigned char high_order_byte = getRegisterValue(&(cpu->rf), rs_location) >> 8;
 	//Load mdr with the high order byte.
 	cpu->mdr = high_order_byte;
 	//Load mar with the value of ra plus rx.
-	cpu->mar = getRegisterValue(&(cpu->rf), ra_location) + getRegisterValue(&(cpu->rf), rx_location);
+	cpu->mar = getRegisterValue(&(cpu->rf), ra_location) + (signed)getRegisterValue(&(cpu->rf), rx_location) + 1;
 	//Set the memory at the address stored in mar with the byte stored in mdr.
 	setMemoryValue(memory, cpu->mar, cpu->mdr);
 }
@@ -170,7 +172,7 @@ void brO(int pc_location, CPU_p cpu) {
 }
 
 
-fetch(CPU_p cpu, Memory_p memory){
+void fetch(CPU_p cpu, Memory_p memory){
 
 	//clearing the IR
 	cpu->ir = 0;
@@ -219,6 +221,4 @@ void loadHOBIntoRf(int register_number, CPU_p cpu){
 	destRegister = getRegisterValue(&(cpu->rf), register_number);	//Getting the contents of the Rd so we can bitshift and load the HOB.
 	destRegister |= (cpu->mdr << 8);
 	setRegisterValue(&(cpu->rf), register_number, destRegister);
-
 }
-

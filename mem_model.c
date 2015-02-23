@@ -34,7 +34,8 @@ void setMemoryValue(Memory_p m, int which, MemoryNode value) {
 }
 
 MemoryNode getMemoryValue(Memory_p m, int which) {
-	return m->mn[which];
+        MemoryNode returnNode = m->mn[which];
+        return returnNode;
 }
 
 void printMemory(Memory_p m) {
@@ -42,4 +43,3 @@ void printMemory(Memory_p m) {
 	for (i = 0; i<MEMORY_SIZE; i++) printf("memory at address %d content: %04X\n", i,
 		getMemoryValue(m, i));
 }
-

@@ -22,11 +22,12 @@ int main() {
 	//jump_test();
 	CPU_p cpu = createCPU();
 	Memory_p memory = createMemory();
+        //We'll be loading the file around here.
 	cpu->pc = PROGRAM_START_LOCATION;
 
-	fetch(cpu, memory);
 	while (!halt)
 	{
+            fetch(cpu, memory);
 		switch (getOperation(cpu->ir)){
 		case ADD:
 			//Get the register locations from the Instruction Register.

@@ -37,7 +37,7 @@ void ldw(int rd_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p 
 void ldbr(int rd_location, int ra_location, int rx_location, CPU_p cpu, Memory_p memory);
 void ldwr(int rd_location, int ra_location, int rx_location, CPU_p cpu, Memory_p memory);
 void ldi(int rd_location, int immediate_8, CPU_p cpu);
-void lea(int rd_location, unsigned char immediate_8, CPU_p cpu);
+void lea(int rd_location, unsigned char immediate_8, CPU_p cpu , Memory_p memory);
 void mov(int rd_location, int rs_location, CPU_p cpu);
 void stb(int rs_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p memory);
 void stw(int rs_location, int ra_location, int immediate_5, CPU_p cpu, Memory_p memory);
@@ -48,7 +48,7 @@ void brZ(int pc_location, CPU_p cpu);
 void brC(int pc_location, CPU_p cpu);
 void brO(int pc_location, CPU_p cpu);
 
-fetch(CPU_p cpu, Memory_p);
+void fetch(CPU_p cpu, Memory_p);
 //helper functions
 int immediate5NegativeSet(int immediate_5);
 void loadHOBIntoRf(int register_number, CPU_p cpu);

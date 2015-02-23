@@ -57,8 +57,8 @@ void and(ALU_p);
 void or(ALU_p);
 void not(ALU_p);
 void xor(ALU_p);
-void shl(ALU_p);
-void shr(ALU_p);
+void shl(ALU_p, int);
+void shr(ALU_p, int);
 
 int getOperation(Register ir);
 int decodeImmed8(Register ir);
