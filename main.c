@@ -15,7 +15,7 @@
 //unsigned char memory[65536];
 
 int main() {
-	int rd_loc, ra_loc, rx_loc, immed3, immed5, immed8, arg;
+	int rd_loc, ra_loc, rx_loc, immediate, args, opcode;
 	int halt = 0;
         char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
 	//ALUTest();
@@ -30,19 +30,186 @@ int main() {
         //parserTest();
         parser(&fileName, memory, cpu);
         display(cpu, memory, cpu->pc);
-        printf("press any key to continue...");
+        printf("\n\nPress any key to continue...");
         getchar();
 	while (!halt)
 	{
             fetch(cpu, memory);
-		switch (getOperation(cpu->ir)){
+            decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu, memory);
+            execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
+            display(cpu, memory, cpu->pc);
+            printf("\n\nPress any key to continue...");
+            getchar();
+	}
+	display(cpu, memory, cpu->pc);
+        printf("\n\nPress any key to continue...");
+        getchar();
+
+	free(memory);
+	memory = NULL;
+	free(cpu);
+	cpu = NULL;
+	return EXIT_SUCCESS;
+}
+
+void decode(int * opcode, int * rd_loc, int * ra_loc, int * rx_loc, int * args, int * immediate, CPU_p cpu, Memory_p memory) {
+    *opcode = getOperation(cpu->ir);
+    switch (*opcode){
 		case ADD:
 			//Get the register locations from the Instruction Register.
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
 			//Load Ra and Rx into ALU registers A and B.
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+
+		case SUB:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+
+		case MUL:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc) & LOW_ORDER_BYTE_MASK, getRegisterValue(&(cpu->rf), *rx_loc) & LOW_ORDER_BYTE_MASK);
+			break;
+
+		case DIV:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+
+		case AND:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+
+		case OR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+		case NOT:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			cpu->alu.A = getRegisterValue(&(cpu->alu), *ra_loc);
+			break;
+
+		case XOR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
+			break;
+
+		case SHL:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*args = decodeArgument1(cpu->ir);
+			*immediate = decodeRxAndImmd3(cpu->ir);
+			cpu->alu.A = getRegisterValue(&(cpu->alu), *ra_loc);
+			break;
+
+		case LDB:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*immediate = decodeImmed5(cpu->ir);
+			break;
+		case LDW:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*immediate = decodeImmed5(cpu->ir);
+			break;
+		case LDBR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			break;
+		case LDWR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			break;
+		case LDI:
+			*rd_loc = decodeRd(cpu->ir);
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case LEA:
+			*rd_loc = decodeRd(cpu->ir);
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case MOV:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			break;
+		case STB:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*immediate = decodeImmed5(cpu->ir);
+			break;
+		case STW:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*immediate = decodeImmed5(cpu->ir);
+			break;
+		case STBR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			break;
+		case STWR:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			break;
+		case BR:
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case BRN:
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case BRZ:
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case BRC:
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case BRO:
+			*immediate = decodeImmed8(cpu->ir);
+			break;
+		case JMP:
+			*rx_loc = decodeRxAndImmd3(cpu->ir);
+			break;
+		case RET:
+                    *args = decodeArgument2(cpu->ir);
+                    *immediate = decodeImmed10(cpu->ir);	
+			break;
+		case PUSH:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			break;
+		case POP:
+			*rd_loc = decodeRd(cpu->ir);
+			*ra_loc = decodeRa(cpu->ir);
+			break;
+		default:
+			break;
+		}
+}
+
+void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt, CPU_p cpu, Memory_p memory){
+    
+    switch (opcode){
+		case ADD:
 			//Execute
 			add(&(cpu->alu));
 			//Set Rd as the value of ALU register R
@@ -53,10 +220,6 @@ int main() {
 			break;
 
 		case SUB:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
 			sub(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), SUB);
@@ -64,10 +227,6 @@ int main() {
 			break;
 
 		case MUL:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc) & LOW_ORDER_BYTE_MASK, getRegisterValue(&(cpu->rf), rx_loc) & LOW_ORDER_BYTE_MASK);
 			mul(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), MUL);
@@ -75,10 +234,6 @@ int main() {
 			break;
 
 		case DIV:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
 			divide(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			//Ra gets remainder
@@ -88,10 +243,6 @@ int main() {
 			break;
 
 		case AND:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
 			and(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), AND);
@@ -99,19 +250,12 @@ int main() {
 			break;
 
 		case OR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
 			or(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), OR);
 			setSWRegFlags(cpu);
 			break;
 		case NOT:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			cpu->alu.A = getRegisterValue(&(cpu->alu), ra_loc);
 			not(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), NOT);
@@ -119,10 +263,6 @@ int main() {
 			break;
 
 		case XOR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), ra_loc), getRegisterValue(&(cpu->rf), rx_loc));
 			xor(&(cpu->alu));
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setALU_Flags(&(cpu->alu), XOR);
@@ -130,19 +270,14 @@ int main() {
 			break;
 
 		case SHL:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			arg = decodeArgument1(cpu->ir);
-			immed3 = decodeRxAndImmd3(cpu->ir);
-			cpu->alu.A = getRegisterValue(&(cpu->alu), ra_loc);
-			if (arg) {
+			if (args) {
 				//SHR
-				shr(&(cpu->alu), immed3);
+				shr(&(cpu->alu), immediate);
 				setALU_Flags(&(cpu->alu), SHR);
 			}
 			else {
 				//SHL
-				shl(&(cpu->alu), immed3);
+				shl(&(cpu->alu), immediate);
 				setALU_Flags(&(cpu->alu), SHL);
 			}
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
@@ -150,114 +285,61 @@ int main() {
 			break;
 
 		case LDB:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			immed5 = decodeImmed5(cpu->ir);
-
-			ldb(rd_loc, ra_loc, immed5, cpu, memory);
+			ldb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
 		case LDW:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			immed5 = decodeImmed5(cpu->ir);
-
-			ldw(rd_loc, ra_loc, immed5, cpu, memory);
+			ldw(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
 		case LDBR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-
 			ldbr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
 		case LDWR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-
 			ldwr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
 		case LDI:
-			rd_loc = decodeRd(cpu->ir);
-			immed8 = decodeImmed8(cpu->ir);
-
-			ldi(rd_loc, immed8, cpu);
+			ldi(rd_loc, immediate, cpu);
 			break;
 		case LEA:
-			rd_loc = decodeRd(cpu->ir);
-			immed8 = decodeImmed8(cpu->ir);
-
-			lea(rd_loc, immed8, cpu, memory);
+			lea(rd_loc, immediate, cpu, memory);
 			break;
 		case MOV:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-
 			mov(rd_loc, ra_loc, cpu);
 			break;
 		case STB:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			immed5 = decodeImmed5(cpu->ir);
-
-			stb(rd_loc, ra_loc, immed5, cpu, memory);
+			stb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
 		case STW:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			immed5 = decodeImmed5(cpu->ir);
-
-			stb(rd_loc, ra_loc, immed5, cpu, memory);
+			stb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
 		case STBR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-
 			stbr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
 		case STWR:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-
 			stwr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
 		case BR:
-			immed8 = decodeImmed8(cpu->ir);
-
-			br(immed8, cpu);
+			br(immediate, cpu);
 			break;
 		case BRN:
-			immed8 = decodeImmed8(cpu->ir);
-
-			brN(immed8, cpu);
+			brN(immediate, cpu);
 			break;
 		case BRZ:
-			immed8 = decodeImmed8(cpu->ir);
-
-			brZ(immed8, cpu);
+			brZ(immediate, cpu);
 			break;
 		case BRC:
-			immed8 = decodeImmed8(cpu->ir);
-
-			brC(immed8, cpu);
+			brC(immediate, cpu);
 			break;
 		case BRO:
-			immed8 = decodeImmed8(cpu->ir);
-			brO(immed8, cpu);
+			brO(immediate, cpu);
 			break;
 		case JMP:
-			rx_loc = decodeRxAndImmd3(cpu->ir);
-
-			void jmp(int rx_location, CPU_p cpu, Memory_p memory);
+			jmp(rx_loc, cpu, memory);
 			break;
 		case RET:
-				//Get the argument bit
-				if (decodeArgument2(cpu->ir)) {
-					switch (decodeImmed10(cpu->ir)) {
+				if (args) {
+					switch (immediate) {
 					case 23:
-						halt = 1;
+						*halt = 1;
                                                 break;
 					default:
 						break;
@@ -266,35 +348,16 @@ int main() {
 				else {
 					ret(cpu, memory);
 				}
-				
-				
 			break;
 		case PUSH:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
 			push(rd_loc, ra_loc, cpu, memory);
 			break;
 		case POP:
-			rd_loc = decodeRd(cpu->ir);
-			ra_loc = decodeRa(cpu->ir);
 			pop(rd_loc, ra_loc, cpu, memory);
 			break;
 		default:
 			break;
 		}
-            display(cpu, memory, cpu->pc);
-            printf("press any key to continue...");
-            getchar();
-	}
-	display(cpu, memory, cpu->pc);
-        printf("press any key to continue...");
-        getchar();
-
-	free(memory);
-	memory = NULL;
-	free(cpu);
-	cpu = NULL;
-	return EXIT_SUCCESS;
 }
 
 int memTest() {

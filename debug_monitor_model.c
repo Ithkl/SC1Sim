@@ -8,7 +8,7 @@
 
 void display(CPU_p cpu, Memory_p memory, unsigned short dump_location) {
     int i = 0;
-    system("cls");
+    system("clear");
     printf("\nRegisters                                  Memory");
     //Printing out the register file and 14 memory addresses.
     for (i;i < 8; i++)
