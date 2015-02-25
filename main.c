@@ -6,6 +6,8 @@
 #include "mem_model.h"
 #include "load_store_op.h"
 #include "jumps_model.h"
+#include "parser_model.h"
+#include "debug_monitor_model.h"
 
 #define PROGRAM_START_LOCATION 0x0000;
 
@@ -15,16 +17,21 @@
 int main() {
 	int rd_loc, ra_loc, rx_loc, immed3, immed5, immed8, arg;
 	int halt = 0;
+        char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
 	//ALUTest();
 	//memTest();
 	//cpu_mem_pipeline_test();
 	//load_store_test();
-	//jump_test();
+	//jump_test();    
 	CPU_p cpu = createCPU();
 	Memory_p memory = createMemory();
         //We'll be loading the file around here.
 	cpu->pc = PROGRAM_START_LOCATION;
-
+        //parserTest();
+        parser(&fileName, memory, cpu);
+        display(cpu, memory, cpu->pc);
+        printf("press any key to continue...");
+        getchar();
 	while (!halt)
 	{
             fetch(cpu, memory);
@@ -251,6 +258,7 @@ int main() {
 					switch (decodeImmed10(cpu->ir)) {
 					case 23:
 						halt = 1;
+                                                break;
 					default:
 						break;
 					}
@@ -274,12 +282,13 @@ int main() {
 		default:
 			break;
 		}
+            display(cpu, memory, cpu->pc);
+            printf("press any key to continue...");
+            getchar();
 	}
-	printRegisterFile(&(cpu->rf));
-	printMemory(memory);
-	printf("Press any key to finish");
-	getchar();
-	getchar();
+	display(cpu, memory, cpu->pc);
+        printf("press any key to continue...");
+        getchar();
 
 	free(memory);
 	memory = NULL;
@@ -536,4 +545,17 @@ int jumps_test() {
 	free(cpu);
 	cpu = NULL;
 	return 0;
+}
+
+int parserTest()
+{
+    int parserflag;
+    CPU_p cpu = createCPU();
+    Memory_p memory = createMemory();
+    char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
+    
+    parserflag = parser(&fileName, memory, cpu);
+    printf("%d", parserflag);
+    printMemory(memory);
+    return 0;
 }

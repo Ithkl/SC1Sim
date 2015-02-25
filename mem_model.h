@@ -9,7 +9,7 @@ MemoryNode_p createMemoryNode(void);
 void setMemoryNode(MemoryNode_p rf, Memory value);*/
 
 //#define MEMORY_SIZE 65535
-#define MEMORY_SIZE 15
+#define MEMORY_SIZE 25
 
 typedef struct memory {
 	MemoryNode mn[MEMORY_SIZE];
