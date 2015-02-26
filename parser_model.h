@@ -12,6 +12,9 @@
 #include "mem_model.h"
 #include "rf_model.h"
 
+#define FILE_LOAD_SUCCESS 0
+#define FILE_LOAD_FAIL 1
+
 int parser(char * fileName, Memory_p memory, CPU_p cpu);
 
 #define HIGH_ORDER_BYTE_MASK 0x0000FF00

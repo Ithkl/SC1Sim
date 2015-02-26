@@ -9,7 +9,7 @@
 #include "parser_model.h"
 #include "debug_monitor_model.h"
 
-#define PROGRAM_START_LOCATION 0x0000;
+#define PROGRAM_START_LOCATION 0x3000;
 
 //2^16
 //unsigned char memory[65536];
@@ -17,7 +17,11 @@
 int main() {
 	int rd_loc, ra_loc, rx_loc, immediate, args, opcode;
 	int halt = 0;
-        char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
+	int executeState = MENU_STATE;
+	//char fileName[40];
+	unsigned short dump_location = PROGRAM_START_LOCATION;
+	int fileState = -1;
+    //char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
 	//ALUTest();
 	//memTest();
 	//cpu_mem_pipeline_test();
@@ -28,22 +32,32 @@ int main() {
         //We'll be loading the file around here.
 	cpu->pc = PROGRAM_START_LOCATION;
         //parserTest();
-        parser(&fileName, memory, cpu);
-        display(cpu, memory, cpu->pc);
+        //parser(&fileName, memory, cpu);
+        while(executeState != EXIT_STATE) {
+            while (executeState == MENU_STATE){
+            display(cpu, memory, dump_location);
+            command_prompt(&fileState, &executeState, &dump_location, cpu, memory);
+            }
+            while (!halt && executeState != EXIT_STATE)
+            {
+                fetch(cpu, memory);
+                decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu, memory);
+                execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
+                if (executeState == STEP_STATE) {
+                    display(cpu, memory, cpu->pc);
+                    printf("\nPress enter key to continue...");
+                    stdinFlush();
+                    getchar();
+                    
+                }
+            }
+            if (executeState != EXIT_STATE){
+                executeState = MENU_STATE;
+            }
+        }
+	/*display(cpu, memory, cpu->pc);
         printf("\n\nPress any key to continue...");
-        getchar();
-	while (!halt)
-	{
-            fetch(cpu, memory);
-            decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu, memory);
-            execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
-            display(cpu, memory, cpu->pc);
-            printf("\n\nPress any key to continue...");
-            getchar();
-	}
-	display(cpu, memory, cpu->pc);
-        printf("\n\nPress any key to continue...");
-        getchar();
+        getchar();*/
 
 	free(memory);
 	memory = NULL;
@@ -52,7 +66,7 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
-void decode(int * opcode, int * rd_loc, int * ra_loc, int * rx_loc, int * args, int * immediate, CPU_p cpu, Memory_p memory) {
+int decode(int * opcode, int * rd_loc, int * ra_loc, int * rx_loc, int * args, int * immediate, CPU_p cpu, Memory_p memory) {
     *opcode = getOperation(cpu->ir);
     switch (*opcode){
 		case ADD:
@@ -206,7 +220,7 @@ void decode(int * opcode, int * rd_loc, int * ra_loc, int * rx_loc, int * args, 
 		}
 }
 
-void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt, CPU_p cpu, Memory_p memory){
+int execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt, CPU_p cpu, Memory_p memory){
     
     switch (opcode){
 		case ADD:

@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 /*
  * parser_model.c
  *  Created on: Feb 20, 2015
@@ -12,7 +13,7 @@
 
 //Returns 0 if successful, returns 1 if failed.
 int parser(char * fileName, Memory_p memory, CPU_p cpu) {
-	int returnValue = 0;
+	int returnValue = FILE_LOAD_SUCCESS;
 	int hexValue;
 	int commandWord;
 	unsigned char memoryValue;
@@ -31,7 +32,7 @@ int parser(char * fileName, Memory_p memory, CPU_p cpu) {
 		}
 		fclose(fp);
 	} else {
-		returnValue = 1;
+		returnValue = FILE_LOAD_FAIL;
 	}
 	return returnValue;
 }
