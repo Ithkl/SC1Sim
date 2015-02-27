@@ -48,7 +48,6 @@ void brZ(int pc_location, CPU_p cpu);
 void brC(int pc_location, CPU_p cpu);
 void brO(int pc_location, CPU_p cpu);
 
-void fetch(CPU_p cpu, Memory_p);
 //helper functions
 int immediate5NegativeSet(int immediate_5);
 void loadHOBIntoRf(int register_number, CPU_p cpu);

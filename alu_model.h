@@ -60,16 +60,6 @@ void xor(ALU_p);
 void shl(ALU_p, int);
 void shr(ALU_p, int);
 
-int getOperation(Register ir);
-int decodeImmed8(Register ir);
-int decodeRd(Register ir);
-int decodeRa(Register ir);
-int decodeRxAndImmd3(Register ir);
-int decodeImmed5(Register ir);
-int decodeArgument1(Register ir);
-int decodeArgument2(Register ir);
-int decodeImmed10(Register ir);
-
 void loadAandBReg(ALU_p alu, Register a, Register b);
 
 void scanTest(int*, int);

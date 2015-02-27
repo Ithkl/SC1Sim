@@ -40,12 +40,14 @@ void command_prompt(int * fileState, int * executeState, unsigned short * dump_l
         }
         printf("\n>");    
 	scanf("%d",&command);
+        getchar();  //Eat the \n left by the scanf
 	switch (command)
 	{
 	case COMMAND_LOAD:
 		printf("\nEnter the file name: ");
-                stdinFlush();
+                //stdinFlush();
 		scanf("%s",&fileName);
+                getchar();  //Eat the \n left by the scanf
 		*fileState = parser(&fileName, memory, cpu);
 		break;
 	case COMMAND_RUN:
@@ -56,22 +58,13 @@ void command_prompt(int * fileState, int * executeState, unsigned short * dump_l
 		break;
 	case COMMAND_DUMP:
 		printf("\nEnter memory location: ");
-                stdinFlush();
+                //stdinFlush();
 		scanf("%x", dump_location);
- 
+                getchar();  //Eat the \n left by the scanf
 		break;
 	case COMMAND_EXIT:
 		*executeState = EXIT_STATE;
 	default:
 		break;
 	}
-}
-
-//This method is attempting to clear out stdin, not quite working as intended.
-//Blocks program if there is no \n in the buffer.
-void stdinFlush() {
-    char c;
-    do{
-        c = fgetc(stdin);
-    }while(c != '\n' && c != EOF);
 }

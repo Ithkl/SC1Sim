@@ -169,38 +169,6 @@ void brO(int pc_location, CPU_p cpu) {
 		cpu->pc += pc_location;
 	}
 }
-
-
-void fetch(CPU_p cpu, Memory_p memory){
-
-	//clearing the IR
-	cpu->ir = 0;
-
-	//Giving the PC to the MAR
-	cpu->mar = cpu->pc;
-
-	//Read signal is sent out, MDR gets the contents of memory at MAR.
-	cpu->mdr = getMemoryValue(memory, cpu->mar);
-
-	//Load the low order byte into IR
-	cpu->ir |= cpu->mdr;
-
-	//Increment PC
-	cpu->pc = cpu->pc + 1;
-
-	//Giving the PC to the MAR
-	cpu->mar = cpu->pc;
-	//Read signal is sent out, MDR gets the contents of memory at MAR.
-	cpu->mdr = getMemoryValue(memory, cpu->mar);
-	//Load the high order byte into IR
-	cpu->ir |= (cpu->mdr << 8);
-
-	//Increment PC
-	cpu->pc = cpu->pc + 1;
-
-}
-
-
 //Helper functions
 
 //Because we don't have a datatype that is 5 bits big we need to check the sign bit of any immediate 5's to make sure they're properly

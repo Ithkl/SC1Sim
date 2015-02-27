@@ -23,5 +23,4 @@
 
 void display(CPU_p cpu, Memory_p memory, unsigned short dump_location);
 void command_prompt(int * fileState, int * executeState, unsigned short * dump_location, CPU_p cpu, Memory_p memory);
-void stdinFlush();
 #endif	/* _DEBUG_MONITOR_MODEL_H */

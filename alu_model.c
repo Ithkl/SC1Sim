@@ -253,52 +253,6 @@ void shr(ALU_p alu, int immediate_3) {
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
-int getOperation(Register ir){
-	return ir >> 11;
-}
-
-int decodeImmed8(Register ir){
-	return ir & IMMED8_MASK;
-}
-
-int decodeRd(Register ir){
-	int rd;
-	rd = ir >> 8;
-	rd = rd & REGISTER_MASK;
-	return rd;
-}
-
-int decodeRa(Register ir) {
-	int ra;
-	ra = ir >> 5;
-	ra = ra & REGISTER_MASK;
-	return ra;
-}
-
-int decodeRxAndImmd3(Register ir) {
-	int rx;
-	rx = (ir >> 2);
-	rx = (rx & REGISTER_MASK);
-	return rx;
-}
-
-int decodeImmed5(Register ir){
-	return ir & IMMED5_MASK;
-}
-
-//For use with SHL and SHR
-int decodeArgument1(Register ir){
-	return ir & ARGS1_MASK;
-}
-//For use with TRAP and RET
-int decodeArgument2(Register ir){
-	return ir & ARGS2_MASK;
-}
-
-int decodeImmed10(Register ir){
-	return ir & IMMED10_MASK;
-}
-
 void loadAandBReg(ALU_p alu, Register a, Register b) {
 	alu->A = a;
 	alu->B = b;

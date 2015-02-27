@@ -8,6 +8,7 @@
 #include "jumps_model.h"
 #include "parser_model.h"
 #include "debug_monitor_model.h"
+#include "control_model.h"
 
 #define PROGRAM_START_LOCATION 0x3000;
 
@@ -41,337 +42,28 @@ int main() {
             while (!halt && executeState != EXIT_STATE)
             {
                 fetch(cpu, memory);
-                decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu, memory);
+                decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu);
                 execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
                 if (executeState == STEP_STATE) {
                     display(cpu, memory, cpu->pc);
                     printf("\nPress enter key to continue...");
-                    stdinFlush();
+                    //stdinFlush();
                     getchar();
                     
                 }
             }
             if (executeState != EXIT_STATE){
                 executeState = MENU_STATE;
+                halt = 0;
             }
         }
-	/*display(cpu, memory, cpu->pc);
-        printf("\n\nPress any key to continue...");
-        getchar();*/
 
-	free(memory);
+        //End of program cleanup.
+        free(memory);
 	memory = NULL;
 	free(cpu);
 	cpu = NULL;
 	return EXIT_SUCCESS;
-}
-
-int decode(int * opcode, int * rd_loc, int * ra_loc, int * rx_loc, int * args, int * immediate, CPU_p cpu, Memory_p memory) {
-    *opcode = getOperation(cpu->ir);
-    switch (*opcode){
-		case ADD:
-			//Get the register locations from the Instruction Register.
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			//Load Ra and Rx into ALU registers A and B.
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-
-		case SUB:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-
-		case MUL:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc) & LOW_ORDER_BYTE_MASK, getRegisterValue(&(cpu->rf), *rx_loc) & LOW_ORDER_BYTE_MASK);
-			break;
-
-		case DIV:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-
-		case AND:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-
-		case OR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-		case NOT:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			cpu->alu.A = getRegisterValue(&(cpu->alu), *ra_loc);
-			break;
-
-		case XOR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			loadAandBReg(&(cpu->alu), getRegisterValue(&(cpu->rf), *ra_loc), getRegisterValue(&(cpu->rf), *rx_loc));
-			break;
-
-		case SHL:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*args = decodeArgument1(cpu->ir);
-			*immediate = decodeRxAndImmd3(cpu->ir);
-			cpu->alu.A = getRegisterValue(&(cpu->alu), *ra_loc);
-			break;
-
-		case LDB:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*immediate = decodeImmed5(cpu->ir);
-			break;
-		case LDW:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*immediate = decodeImmed5(cpu->ir);
-			break;
-		case LDBR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			break;
-		case LDWR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			break;
-		case LDI:
-			*rd_loc = decodeRd(cpu->ir);
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case LEA:
-			*rd_loc = decodeRd(cpu->ir);
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case MOV:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			break;
-		case STB:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*immediate = decodeImmed5(cpu->ir);
-			break;
-		case STW:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*immediate = decodeImmed5(cpu->ir);
-			break;
-		case STBR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			break;
-		case STWR:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			break;
-		case BR:
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case BRN:
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case BRZ:
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case BRC:
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case BRO:
-			*immediate = decodeImmed8(cpu->ir);
-			break;
-		case JMP:
-			*rx_loc = decodeRxAndImmd3(cpu->ir);
-			break;
-		case RET:
-                    *args = decodeArgument2(cpu->ir);
-                    *immediate = decodeImmed10(cpu->ir);	
-			break;
-		case PUSH:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			break;
-		case POP:
-			*rd_loc = decodeRd(cpu->ir);
-			*ra_loc = decodeRa(cpu->ir);
-			break;
-		default:
-			break;
-		}
-}
-
-int execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt, CPU_p cpu, Memory_p memory){
-    
-    switch (opcode){
-		case ADD:
-			//Execute
-			add(&(cpu->alu));
-			//Set Rd as the value of ALU register R
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			//Set the flags on the ALU and transfer them over.
-			setALU_Flags(&(cpu->alu), ADD);
-			setSWRegFlags(cpu);
-			break;
-
-		case SUB:
-			sub(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), SUB);
-			setSWRegFlags(cpu);
-			break;
-
-		case MUL:
-			mul(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), MUL);
-			setSWRegFlags(cpu);
-			break;
-
-		case DIV:
-			divide(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			//Ra gets remainder
-			setRegisterValue(&(cpu->rf), ra_loc, cpu->alu.A);
-			setALU_Flags(&(cpu->alu), MUL);
-			setSWRegFlags(cpu);
-			break;
-
-		case AND:
-			and(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), AND);
-			setSWRegFlags(cpu);
-			break;
-
-		case OR:
-			or(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), OR);
-			setSWRegFlags(cpu);
-			break;
-		case NOT:
-			not(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), NOT);
-			setSWRegFlags(cpu);
-			break;
-
-		case XOR:
-			xor(&(cpu->alu));
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setALU_Flags(&(cpu->alu), XOR);
-			setSWRegFlags(cpu);
-			break;
-
-		case SHL:
-			if (args) {
-				//SHR
-				shr(&(cpu->alu), immediate);
-				setALU_Flags(&(cpu->alu), SHR);
-			}
-			else {
-				//SHL
-				shl(&(cpu->alu), immediate);
-				setALU_Flags(&(cpu->alu), SHL);
-			}
-			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
-			setSWRegFlags(cpu);
-			break;
-
-		case LDB:
-			ldb(rd_loc, ra_loc, immediate, cpu, memory);
-			break;
-		case LDW:
-			ldw(rd_loc, ra_loc, immediate, cpu, memory);
-			break;
-		case LDBR:
-			ldbr(rd_loc, ra_loc, rx_loc, cpu, memory);
-			break;
-		case LDWR:
-			ldwr(rd_loc, ra_loc, rx_loc, cpu, memory);
-			break;
-		case LDI:
-			ldi(rd_loc, immediate, cpu);
-			break;
-		case LEA:
-			lea(rd_loc, immediate, cpu, memory);
-			break;
-		case MOV:
-			mov(rd_loc, ra_loc, cpu);
-			break;
-		case STB:
-			stb(rd_loc, ra_loc, immediate, cpu, memory);
-			break;
-		case STW:
-			stb(rd_loc, ra_loc, immediate, cpu, memory);
-			break;
-		case STBR:
-			stbr(rd_loc, ra_loc, rx_loc, cpu, memory);
-			break;
-		case STWR:
-			stwr(rd_loc, ra_loc, rx_loc, cpu, memory);
-			break;
-		case BR:
-			br(immediate, cpu);
-			break;
-		case BRN:
-			brN(immediate, cpu);
-			break;
-		case BRZ:
-			brZ(immediate, cpu);
-			break;
-		case BRC:
-			brC(immediate, cpu);
-			break;
-		case BRO:
-			brO(immediate, cpu);
-			break;
-		case JMP:
-			jmp(rx_loc, cpu, memory);
-			break;
-		case RET:
-				if (args) {
-					switch (immediate) {
-					case 23:
-						*halt = 1;
-                                                break;
-					default:
-						break;
-					}
-				}
-				else {
-					ret(cpu, memory);
-				}
-			break;
-		case PUSH:
-			push(rd_loc, ra_loc, cpu, memory);
-			break;
-		case POP:
-			pop(rd_loc, ra_loc, cpu, memory);
-			break;
-		default:
-			break;
-		}
 }
 
 int memTest() {
