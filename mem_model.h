@@ -4,27 +4,25 @@
 typedef unsigned char MemoryNode;
 typedef MemoryNode * MemoryNode_p;
 
+//Prototype for creating a memory node on the heap.
 MemoryNode_p createMemoryNode(void);
-/*void clearMemoryNode(MemoryNode_p rf);
-void setMemoryNode(MemoryNode_p rf, Memory value);*/
 
 #define MEMORY_SIZE 65535
 //#define MEMORY_SIZE 25
 
+//Definition of the memory structure.
 typedef struct memory {
 	MemoryNode mn[MEMORY_SIZE];
 } Memory;
 
+//Creates a nice pointer name for memory.
 typedef Memory * Memory_p;
 
+//Prototype methods
 Memory_p createMemory(void);	// constructor
 MemoryNode getMemoryValue(Memory_p m, int which);
 void setMemoryValue(Memory_p m, int which, MemoryNode v);
 void clearMemory(Memory_p m);
 void printMemory(Memory_p m);
-/*int getContentLOB(Memory_p m, int which);	// returns LOB of register which
-void putContentLOB(Memory_p m, int which, int v);	// puts an unsigned value from v into register which*/
 
-
-
-#endif
+#endif //_MEM_MODEL_H

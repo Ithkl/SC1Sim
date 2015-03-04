@@ -7,10 +7,11 @@
 #include "mem_model.h"
 #include "parser_model.h"
 
-
+//Display part of the GUI.  Displays SW, IR, PC, and the working registers.
+//Also 14 bytes of memory around the dump location.
 void display(CPU_p cpu, Memory_p memory, unsigned short dump_location) {
     int i = 0;
-    system("cls");
+    system("clear");
     printf("\nRegisters                                  Memory");
     //Printing out the register file and 14 memory addresses.
     for (i;i < 8; i++)
@@ -20,18 +21,21 @@ void display(CPU_p cpu, Memory_p memory, unsigned short dump_location) {
     printf("\nSW: [%0.4X]         IR: [%0.4X]        PC: [%0.4X]", cpu->sw, cpu->ir, cpu->pc);  
 }
 
-void command_prompt(int * fileState, int * executeState, unsigned short * dump_location, CPU_p cpu, Memory_p memory){
+//Prompts the user for the command that they want executed.
+void command_prompt(int * fileState_ptr, int * executeState_ptr, unsigned short * dump_location_ptr, CPU_p cpu, Memory_p memory){
 	int command;
 	char fileName[40];
-	printf("\nCommand: 1) load program, 2) run program, 3) step program, 4) dump memory, 5) exit");
-        switch(*fileState){
+	printf("\nCommand: 1) load program, 2) run program, 3) step program, 4) dump memory\n5) exit");
+        switch(*fileState_ptr){
+            //Displays an error if the file was invalid.
             case FILE_LOAD_FAIL:
                 printf("\nError loading file, please check file location.");
-                *fileState = FILE_DO_NOT_DISPLAY;
+                *fileState_ptr = FILE_DO_NOT_DISPLAY;
                 break;
+            //Displays a success message if the file was valid.
             case FILE_LOAD_SUCCESS:
                 printf("\nFile loaded successfully.");
-                *fileState = FILE_DO_NOT_DISPLAY;
+                *fileState_ptr = FILE_DO_NOT_DISPLAY;
                 break;
             default:
                 //Don't do anything
@@ -43,27 +47,30 @@ void command_prompt(int * fileState, int * executeState, unsigned short * dump_l
         getchar();  //Eat the \n left by the scanf
 	switch (command)
 	{
+        //Loads the file instructions that the user gives.
 	case COMMAND_LOAD:
 		printf("\nEnter the file name: ");
-                //stdinFlush();
 		scanf("%s",&fileName);
                 getchar();  //Eat the \n left by the scanf
-		*fileState = parser(&fileName, memory, cpu);
+		*fileState_ptr = parser(&fileName, memory, cpu);
 		break;
+        //Runs the file commands that the user input.
 	case COMMAND_RUN:
-		*executeState = RUN_STATE;
+		*executeState_ptr = RUN_STATE;
 		break;
+        //Steps through the file commands that the user input.
 	case COMMAND_STEP:
-		*executeState = STEP_STATE;
+		*executeState_ptr = STEP_STATE;
 		break;
+        //Goes to a memory location based on the value the user input.
 	case COMMAND_DUMP:
 		printf("\nEnter memory location: ");
-                //stdinFlush();
-		scanf("%x", dump_location);
+		scanf("%x", dump_location_ptr);
                 getchar();  //Eat the \n left by the scanf
 		break;
+        //Exits the prompt if the user requests to.
 	case COMMAND_EXIT:
-		*executeState = EXIT_STATE;
+		*executeState_ptr = EXIT_STATE;
 	default:
 		break;
 	}

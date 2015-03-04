@@ -2,6 +2,7 @@
 #include "control_model.h"
 #include "alu_model.h"
 #include "load_store_op.h"
+#include "jumps_model.h"
 
 //Gets the opcode out of the instruction.
 int getOperation(Register ir){
@@ -10,7 +11,7 @@ int getOperation(Register ir){
 
 //Gets the immediate 8 out of an instruction.
 int decodeImmed8(Register ir){
-	return ir & IMMED8_MASK;
+	return immed8_sign_extend(ir & IMMED8_MASK);
 }
 
 //Decode the number of the destination register.
@@ -58,6 +59,7 @@ int decodeImmed10(Register ir){
 	return ir & IMMED10_MASK;
 }
 
+//Performs the operations that the CPU performs in it's fetch stage.
 void fetch(CPU_p cpu, Memory_p memory){
 
 	//clearing the IR
@@ -87,6 +89,7 @@ void fetch(CPU_p cpu, Memory_p memory){
 
 }
 
+//Performs the operations that the CPU does in its decode stage.
 void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_ptr, int * args_ptr, int * immediate_ptr, CPU_p cpu) {
     *opcode_ptr = getOperation(cpu->ir);
     //Decode the opcode so we know what registers to prep.
@@ -229,21 +232,27 @@ void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_p
 			*ra_loc_ptr = decodeRa(cpu->ir);
 			*rx_loc_ptr = decodeRxAndImmd3(cpu->ir);
 			break;
+                        //Gets immediate for break.
 		case BR:
 			*immediate_ptr = decodeImmed8(cpu->ir);
 			break;
+                        //Gets immediate for break on negative.
 		case BRN:
 			*immediate_ptr = decodeImmed8(cpu->ir);
 			break;
+                        //Gets immediate for break on zero.
 		case BRZ:
 			*immediate_ptr = decodeImmed8(cpu->ir);
 			break;
+                        //Gets immediate for break on carry.
 		case BRC:
 			*immediate_ptr = decodeImmed8(cpu->ir);
 			break;
+                        //Gets immediate for break on overflow.
 		case BRO:
 			*immediate_ptr = decodeImmed8(cpu->ir);
 			break;
+                        //Gets Rx location for jump.
 		case JMP:
 			*rx_loc_ptr = decodeRxAndImmd3(cpu->ir);
 			break;
@@ -267,6 +276,7 @@ void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_p
 		}
 }
 
+//Performs the operations the the CPU does in its execute state.
 void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt_ptr, CPU_p cpu, Memory_p memory) {
     //Check the opcode so we know what command to execute.
     switch (opcode){
@@ -358,59 +368,77 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
 			setRegisterValue(&(cpu->rf), rd_loc, cpu->alu.R);
 			setSWRegFlags(cpu);
 			break;
-
+                        //Executes load byte.
 		case LDB:
 			ldb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
+                        //Executes load word.
 		case LDW:
 			ldw(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
+                        //Executes load byte by register.
 		case LDBR:
 			ldbr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
+                        //Executes load word by register.
 		case LDWR:
 			ldwr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
+                        //Executes load immediate.
 		case LDI:
 			ldi(rd_loc, immediate, cpu);
 			break;
+                        //Executes effective address.
 		case LEA:
 			lea(rd_loc, immediate, cpu, memory);
 			break;
+                        //Executes move.
 		case MOV:
 			mov(rd_loc, ra_loc, cpu);
 			break;
+                        //Executes store byte.
 		case STB:
 			stb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
+                        //Executes store word.
 		case STW:
 			stb(rd_loc, ra_loc, immediate, cpu, memory);
 			break;
+                        //Executes store byte by register.
 		case STBR:
 			stbr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
+                        //Executes store word by register.
 		case STWR:
 			stwr(rd_loc, ra_loc, rx_loc, cpu, memory);
 			break;
+                        //Executes break.
 		case BR:
 			br(immediate, cpu);
 			break;
+                        //Executes break on negative.
 		case BRN:
 			brN(immediate, cpu);
 			break;
+                        //Executes break on zero.
 		case BRZ:
 			brZ(immediate, cpu);
 			break;
+                        //Executes break on carry.
 		case BRC:
 			brC(immediate, cpu);
 			break;
+                        //Executes break on overflow.
 		case BRO:
 			brO(immediate, cpu);
 			break;
+                        //Executes jump.
 		case JMP:
 			jmp(rx_loc, cpu, memory);
 			break;
+                        //Executes return or halt.
 		case RET:
+                        //If the argument bits are set, go to trap.
 			if (args) {
                             switch (immediate) {
                                 case HALT:
@@ -421,17 +449,29 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
                                     break;
                             }
 			}
+                        //Return.
 			else {
                             ret(cpu, memory);
 			}
 			break;
+                        //Executes push on the stack.
 		case PUSH:
 			push(rd_loc, ra_loc, cpu, memory);
 			break;
+                        //Executes pop on the stack.
 		case POP:
 			pop(rd_loc, ra_loc, cpu, memory);
 			break;
 		default:
 			break;
 		}
+}
+
+//Helper method
+//This makes sure negative immediate8
+int immed8_sign_extend(int immed8) {
+    if(immed8 & 0x00000080){
+        immed8 |= 0xffffff00;
+    }
+    return immed8;
 }

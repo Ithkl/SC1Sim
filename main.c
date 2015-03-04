@@ -1,5 +1,14 @@
 #define _CRT_SECURE_NO_WARNINGS
-
+/*
+SC-1 sim
+ 
+Indiana Davis
+Jackson Hubert
+James Nance
+Luciana Barrera
+ 
+2/27/2015
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "cpu_model.h"
@@ -12,9 +21,8 @@
 
 #define PROGRAM_START_LOCATION 0x3000;
 
-//2^16
-//unsigned char memory[65536];
 
+//Runs the program and all of it's functions.
 int main() {
 	int rd_loc, ra_loc, rx_loc, immediate, args, opcode;
 	int halt = 0;
@@ -22,28 +30,28 @@ int main() {
 	//char fileName[40];
 	unsigned short dump_location = PROGRAM_START_LOCATION;
 	int fileState = -1;
-    //char fileName[] = "C:\\Users\\James\\Desktop\\add.txt";
-	//ALUTest();
-	//memTest();
-	//cpu_mem_pipeline_test();
-	//load_store_test();
-	//jump_test();    
+        
 	CPU_p cpu = createCPU();
 	Memory_p memory = createMemory();
-        //We'll be loading the file around here.
+        //Default PC start location.
 	cpu->pc = PROGRAM_START_LOCATION;
-        //parserTest();
-        //parser(&fileName, memory, cpu);
+        //Checks if the user wants to exit the program.
         while(executeState != EXIT_STATE) {
+            //Checks if the executeState is for the main menu.
             while (executeState == MENU_STATE){
             display(cpu, memory, dump_location);
             command_prompt(&fileState, &executeState, &dump_location, cpu, memory);
             }
+            //Checks to see if the user wants to exit the program or if the program ended.
             while (!halt && executeState != EXIT_STATE)
             {
+                //Gets instruction register contents.
                 fetch(cpu, memory);
+                //Gets information out of opcode.
                 decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu);
+                //Performs command.
                 execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
+                //Checks to see if the user wants to use the step version of the program.
                 if (executeState == STEP_STATE) {
                     display(cpu, memory, cpu->pc);
                     printf("\nPress enter key to continue...");
@@ -52,6 +60,8 @@ int main() {
                     
                 }
             }
+            //Checks to see if the user wants to exit the program.
+            //If not, resets halt and redirects program flow into the menu.
             if (executeState != EXIT_STATE){
                 executeState = MENU_STATE;
                 halt = 0;
@@ -66,6 +76,7 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
+//Tests our mem_model source code.
 int memTest() {
 	Memory_p m = createMemory();
 	MemoryNode node1 = 5;
@@ -90,6 +101,7 @@ int memTest() {
 	getchar();
 }
 
+//Tests our alu_model source code.
 int ALUTest() {
 	int dest, op1, op2, sel;			// register addresses
 
@@ -146,6 +158,7 @@ int ALUTest() {
 	free(rf);
 }
 
+//Tests to make sure the pipeline is working.
 int cpu_mem_pipeline_test()
 {
 	CPU_p cpu = createCPU();
@@ -207,6 +220,7 @@ int cpu_mem_pipeline_test()
 	return 0;
 }
 
+//Tests our load and store source code.
 load_store_test()
 {
 	Memory_p memory = createMemory();
@@ -243,6 +257,7 @@ load_store_test()
 	cpu = NULL;
 }
 
+//Tests our jump source code.
 int jumps_test() {
 	Memory_p memory = createMemory();
 	CPU_p cpu = createCPU();
@@ -316,6 +331,7 @@ int jumps_test() {
 	return 0;
 }
 
+//Tests our parser source code.
 int parserTest()
 {
     int parserflag;
@@ -327,4 +343,10 @@ int parserTest()
     printf("%d", parserflag);
     printMemory(memory);
     return 0;
+}
+
+//Tests our scanning source code.
+void scanTest(int *i, int j) {
+	printf("%d", j);
+	*i = j;
 }

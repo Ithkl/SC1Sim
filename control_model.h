@@ -1,10 +1,3 @@
-/* 
- * File:   control_model.h
- * Author: James
- *
- * Created on February 26, 2015, 5:52 PM
- */
-
 #ifndef _CONTROL_MODEL_H
 #define	_CONTROL_MODEL_H
 
@@ -13,6 +6,7 @@
 
 #define HALT 23
 
+//Prototypes for control.h.
 int getOperation(Register ir);
 int decodeImmed8(Register ir);
 int decodeRd(Register ir);
@@ -26,5 +20,6 @@ void fetch(CPU_p cpu, Memory_p);
 void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_ptr, int * args_ptr, int * immediate_ptr, CPU_p cpu);
 void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt_ptr, CPU_p cpu, Memory_p memory);
 
+//helper meathods
+int immed8_sign_extend(int immed8);
 #endif	/* _CONTROL_MODEL_H */
-

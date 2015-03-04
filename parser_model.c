@@ -12,6 +12,7 @@
 #include "parser_model.h"
 
 //Returns 0 if successful, returns 1 if failed.
+//Parses a hex file into memory.
 int parser(char * fileName, Memory_p memory, CPU_p cpu) {
 	int returnValue = FILE_LOAD_SUCCESS;
 	int hexValue;
@@ -19,9 +20,11 @@ int parser(char * fileName, Memory_p memory, CPU_p cpu) {
 	unsigned char memoryValue;
 	FILE * fp;
 	fp = fopen(fileName, "r");
+        //Checks to see if the file opened properly.
 	if(fp != NULL) {
 		fscanf (fp, "%x", &hexValue);
 		cpu->pc = hexValue;
+                //While we haven't hit the end of file, read in bytes.
 		while(fscanf(fp, "%x", &commandWord) != EOF) {
 			memoryValue = commandWord & LOW_ORDER_BYTE_MASK;
 			setMemoryValue(memory, hexValue, memoryValue);
@@ -31,6 +34,7 @@ int parser(char * fileName, Memory_p memory, CPU_p cpu) {
 			hexValue++;
 		}
 		fclose(fp);
+        //If anything goes wrong, set the return value to the fail marker.
 	} else {
 		returnValue = FILE_LOAD_FAIL;
 	}

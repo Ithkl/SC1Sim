@@ -4,34 +4,16 @@
 #include <stdlib.h>
 #include "alu_model.h"
 
-/*
-Jackson Hubert and James Nance
-Date:1-30-2015
-TCSS 372
-Description:
-This is a completed ALU using the third example code as a template.  The arithmetic functions have
-been added and the set flag functions have been fleshed out.
-
-alu_model.c
-Programmer: George Mobus
-Date: 1-22-2015
-Description:
-This program provides example code for creating register objects and a register file. These two objects
-can be instantiated either on the stack ("raw") or on the heap (i.e. constructed). Several methods (OO-style
-functions) are given to show how to write them in object-oriented style in C. Note that when an object is
-instantiated in the heap the first argument passed in a method is always the pointer to the specific object.
-That pointer is actually the 'this' reference in Java, where it is implied in Java it is explicit in C.
-The main() test driver also shows how data conversions from unsigned to signed work.
-*/
 
 // ALU methods
-
+//This method creates an ALU object on the heap.
 ALU_p createALU(void) {
 	ALU_p alu = (ALU_p)malloc(sizeof(ALU));
 	clearALU(alu);
 	return alu;
 }
 
+//This method clears all stored ALU memory.
 void clearALU(ALU_p alu) {
 	alu->A = 0x0;
 	alu->B = 0x0;
@@ -39,12 +21,14 @@ void clearALU(ALU_p alu) {
 	alu->flags = 0x0;
 }
 
+//This method sets an ALU register with the given value.
 void setALU_Registers(ALU_p alu, Register opnd1, Register opnd2) {
 	alu->A = opnd1;
 	alu->B = opnd2;
 	alu->R = 0x0;
 }
 
+//This method determines what operations are performed on the ALU register values.
 void performOperation(ALU_p alu, int op) {
 
 	switch (op) {
@@ -65,31 +49,7 @@ void performOperation(ALU_p alu, int op) {
 
 }
 
-/*void setALU_Flags(ALU_p alu, unsigned result) {
-int sign_A, sign_B, sign_R;
-
-sign_A = alu->A & SIGN_BIT_TEST;
-sign_B = alu->B & SIGN_BIT_TEST;
-sign_R = alu->R & SIGN_BIT_TEST;
-
-if (result > 65535) alu->flags |= OVERFLOW_SET;			// set overflow flag
-else if (sign_R) alu->flags |= NEGATIVE_SET;		// set negative flag
-else if (alu->R == 0) alu->flags |= ZERO_SET;
-else if (result > 32767) alu->flags |= CARRY_SET;
-
-}*/
-
-/*void setALU_Flags(ALU_p alu, unsigned result) {
-
-alu->flags = 0x0;
-
-//alu->flags |= OVERFLOW_SET;
-//alu->flags |= NEGATIVE_SET;
-alu->flags |= ZERO_SET;
-alu->flags |= CARRY_SET;
-
-}*/
-
+//Sets the ALU's flags with the given values.
 void setALU_Flags(ALU_p alu, int opcode) {
 	int sign_A, sign_B, sign_R;
 
@@ -113,6 +73,7 @@ void setALU_Flags(ALU_p alu, int opcode) {
 			alu->flags &= ~CARRY_SET;
 		}
 		break;
+        //Subtracts two values and checks for flag values (negative, zero).
 	case SUB:
 		if ((sign_A != sign_B) && (sign_R != sign_A)) {
 			alu->flags |= OVERFLOW_SET;
@@ -127,6 +88,7 @@ void setALU_Flags(ALU_p alu, int opcode) {
 			alu->flags &= ~CARRY_SET;
 		}
 		break;
+        //Shifts a value to the left and checks for flag values (overflow, negative, zero)
 	case SHL:
 		if (sign_A) { //if our register A contains a 1 in the high order bit.
 			alu->flags |= CARRY_SET;
@@ -136,6 +98,7 @@ void setALU_Flags(ALU_p alu, int opcode) {
 		}
 		alu->flags &= ~OVERFLOW_SET;
 		break;
+        //Shifts a value to the right and checks for flag values (negative, zero).
 	case SHR:
 		if (alu->A & SHR_CARRY_MASK) {
 			alu->flags |= CARRY_SET;
@@ -166,99 +129,88 @@ void setALU_Flags(ALU_p alu, int opcode) {
 
 }
 
+//Adds the ALU A and B registers and sets the total in the R register.
 void add(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 + opnd2;	// add two integers to check overflow, etc.
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
-
+//Subtracts the ALU A and B registers and sets the sum in the R register.
 void sub(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 - opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
-
+//Multiplies the ALU A and B registers and sets the product in the R register.
 void mul(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 * opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Multiplies the ALU A and B registers and sets the quotient in the R register.
+//The remainder goes in the A register
 void divide(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 / opnd2;
 	unsigned remainder = opnd1 % opnd2;
-	//setALU_Flags(alu, result);
 	alu->A = remainder & LOW_ORDER_WORD_MASK;
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
-
+//Performs a bitwise and on the ALU A and B registers and sets the result in the R register.
 void and(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 & opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Performs a bitwise or on the ALU A and B registers and sets the result in the R register.
 void or(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 | opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Performs a bitwise not on the ALU A register and sets the result in the R register.
 void not(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned result = ~opnd1;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Performs a bitwise exclusive or on the ALU A and B registers and sets the result in the R register.
 void xor(ALU_p alu) {
 	unsigned opnd1 = (unsigned)alu->A;
 	unsigned opnd2 = (unsigned)alu->B;
 	unsigned result = opnd1 ^ opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Performs a logical shift left on the A register and sets it in the R register.
 void shl(ALU_p alu, int immediate_3) {
 	unsigned opnd1 = (unsigned)alu->A;
 	int opnd2 = immediate_3;
-	//printf("Enter immediate 3 value: ");
-	//scanf("%d", &opnd2);
-	//scanTest(&opnd2, 1);
 	unsigned result = opnd1 << opnd2;
-	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//Performs a logical shift right on the A register and sets it in the R register.
 void shr(ALU_p alu, int immediate_3) {
 	unsigned opnd1 = (unsigned)alu->A;
 	int opnd2 = immediate_3;
-	//printf("Enter immediate 3 value: ");
-	//scanf("%d", &opnd2);
-	//scanTest(&opnd2, 1);
 	unsigned result = opnd1 >> opnd2;
 	//setALU_Flags(alu, result);
 	alu->R = result & LOW_ORDER_WORD_MASK;
 }
 
+//A helper function that loads the values from the given registers for operations.
 void loadAandBReg(ALU_p alu, Register a, Register b) {
 	alu->A = a;
 	alu->B = b;
-}
-
-void scanTest(int *i, int j) {
-	printf("%d", j);
-	*i = j;
 }

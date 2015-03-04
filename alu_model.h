@@ -21,11 +21,13 @@ Continued by Jackson Hubert and James Nance
 #define SHL 8
 #define SHR 9
 
+//Masks for setting flags on the ALU
 #define OVERFLOW_SET 0x1
 #define NEGATIVE_SET 0x8
 #define ZERO_SET 0x4
 #define CARRY_SET 0x2
 
+//Masks for decoding op codes.
 #define IMMED8_MASK 0x00FF
 #define REGISTER_MASK 0x0007
 #define IMMED5_MASK 0x001F
@@ -33,20 +35,23 @@ Continued by Jackson Hubert and James Nance
 #define ARGS2_MASK 0x0400
 #define IMMED10_MASK 0x03FF
 
+//Masks for testing flags
 #define CARRY_TEST 0x4000
 #define SIGN_BIT_TEST 0x8000
-
 #define SHR_CARRY_MASK 0x1
 
+//Struct for the ALU
 typedef struct alu {
 	Register A, B, R;
 	unsigned char flags;	// n, z, c, o - low order nybble
 } ALU;
 
+//A clean name for the ALU pointer
 typedef ALU * ALU_p;
 
+//Prototypes for ALU methods
 ALU_p createALU(void);
-void clearALU(ALU_p);	// clears registers and flags
+void clearALU(ALU_p);
 void performOperation(ALU_p, int);
 void setALU_Flags(ALU_p, int);
 void add(ALU_p);
@@ -60,8 +65,7 @@ void xor(ALU_p);
 void shl(ALU_p, int);
 void shr(ALU_p, int);
 
+//helper method prototypes.
 void loadAandBReg(ALU_p alu, Register a, Register b);
-
-void scanTest(int*, int);
 
 #endif
