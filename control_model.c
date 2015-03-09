@@ -449,42 +449,8 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
                                     *halt_ptr = 1;
                                     break;
                                 case GETS:
-                                    memlocation = getRegisterValue(&(cpu->rf), 0);
-                                    //flush stdin
-                                    fpurge(stdin);
-                                    //get the first character
-                                    currentCharacter = getchar();
-                                    while (1){
-                                        //If the character isn't a line return,
-                                        //write it to the data register
-                                        if(currentCharacter != CARRAGE_RETURN) {
-                                            setData(currentCharacter & LOW_ORDER_BYTE_MASK, keyboard_io);
-                                            setReady(keyboard_io);
-                                        }
-                                        else {  //write a null zero to data
-                                            setData('\0', keyboard_io);
-                                            setReady(keyboard_io);
-                                        }
-                                        //If the io is ready to be read.
-                                        if(getStatus(keyboard_io)) {
-                                            //load the data and the address
-                                            cpu->mdr = getData();
-                                            cpu->mar = memlocation;
-                                            //write
-                                            setMemoryValue(memory,cpu->mar,cpu->mdr);
-                                            //set io to not ready.
-                                            setNotReady(keyboard_io);
-                                            //increment memory location
-                                            memlocation++;
-                                        }
-                                        //if we just wrote a carrage return,
-                                        //get out of the while loop
-                                        if(currentCharacter = CARRAGE_RETURN){
-                                            break;
-                                        }
-                                        //get the next character in stdin.
-                                        currentCharacter = getchar();
-                                    }
+                                    getstringtrap(keyboard_io, cpu, memory);
+                                    break;
                                 default:
                                     break;
                             }

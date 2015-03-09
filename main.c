@@ -53,7 +53,7 @@ int main() {
                 //Gets information out of opcode.
                 decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu);
                 //Performs command.
-                execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, keyboard_io, monitor_io cpu, memory);
+                execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, keyboard_io, monitor_io, cpu, memory);
                 //Checks to see if the user wants to use the step version of the program.
                 if (executeState == STEP_STATE) {
                     display(cpu, memory, cpu->pc);

@@ -3,10 +3,11 @@
 
 #include "cpu_model.h"
 #include "mem_model.h"
+#include "io_controller_model.h"
 
 #define HALT 32
 #define GETS 22
-#define CARRAGE_RETURN '\n'
+
 
 //Prototypes for control.h.
 int getOperation(Register ir);

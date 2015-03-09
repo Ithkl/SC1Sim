@@ -4,7 +4,7 @@
 #include "io_controller_model.h"
 
 Io_monitor_p createIoController(){
-    Io_monitor_p io_p = (Io_monitor_p) malloc(sizeof Io_monitor);
+    Io_monitor_p io_p = (Io_monitor_p) malloc(sizeof(Io_monitor));
     return io_p;
 }
 
