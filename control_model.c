@@ -1,8 +1,9 @@
-
+#include "stdio.h"
 #include "control_model.h"
 #include "alu_model.h"
 #include "load_store_op.h"
 #include "jumps_model.h"
+#include "io_controller_model.h"
 
 //Gets the opcode out of the instruction.
 int getOperation(Register ir){
@@ -277,7 +278,9 @@ void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_p
 }
 
 //Performs the operations the the CPU does in its execute state.
-void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt_ptr, CPU_p cpu, Memory_p memory) {
+void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immediate, int * halt_ptr, Io_monitor_p keyboard_io, Io_monitor_p monitor_io, CPU_p cpu, Memory_p memory) {
+    unsigned short memlocation;
+    int currentCharacter;
     //Check the opcode so we know what command to execute.
     switch (opcode){
 		case ADD:
@@ -445,6 +448,43 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
                                     //HALT
                                     *halt_ptr = 1;
                                     break;
+                                case GETS:
+                                    memlocation = getRegisterValue(&(cpu->rf), 0);
+                                    //flush stdin
+                                    fpurge(stdin);
+                                    //get the first character
+                                    currentCharacter = getchar();
+                                    while (1){
+                                        //If the character isn't a line return,
+                                        //write it to the data register
+                                        if(currentCharacter != CARRAGE_RETURN) {
+                                            setData(currentCharacter & LOW_ORDER_BYTE_MASK, keyboard_io);
+                                            setReady(keyboard_io);
+                                        }
+                                        else {  //write a null zero to data
+                                            setData('\0', keyboard_io);
+                                            setReady(keyboard_io);
+                                        }
+                                        //If the io is ready to be read.
+                                        if(getStatus(keyboard_io)) {
+                                            //load the data and the address
+                                            cpu->mdr = getData();
+                                            cpu->mar = memlocation;
+                                            //write
+                                            setMemoryValue(memory,cpu->mar,cpu->mdr);
+                                            //set io to not ready.
+                                            setNotReady(keyboard_io);
+                                            //increment memory location
+                                            memlocation++;
+                                        }
+                                        //if we just wrote a carrage return,
+                                        //get out of the while loop
+                                        if(currentCharacter = CARRAGE_RETURN){
+                                            break;
+                                        }
+                                        //get the next character in stdin.
+                                        currentCharacter = getchar();
+                                    }
                                 default:
                                     break;
                             }

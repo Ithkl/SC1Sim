@@ -18,6 +18,7 @@ Luciana Barrera
 #include "parser_model.h"
 #include "debug_monitor_model.h"
 #include "control_model.h"
+#include "io_controller_model.h"
 
 #define PROGRAM_START_LOCATION 0x3000;
 
@@ -33,6 +34,8 @@ int main() {
         
 	CPU_p cpu = createCPU();
 	Memory_p memory = createMemory();
+        Io_monitor_p keyboard_io = createIoController();
+        Io_monitor_p monitor_io = createIoController();
         //Default PC start location.
 	cpu->pc = PROGRAM_START_LOCATION;
         //Checks if the user wants to exit the program.
@@ -50,12 +53,15 @@ int main() {
                 //Gets information out of opcode.
                 decode(&opcode, &rd_loc, &ra_loc, &rx_loc, &args, &immediate, cpu);
                 //Performs command.
-                execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, cpu, memory);
+                execute(opcode, rd_loc, ra_loc, rx_loc, args, immediate, &halt, keyboard_io, monitor_io cpu, memory);
                 //Checks to see if the user wants to use the step version of the program.
                 if (executeState == STEP_STATE) {
                     display(cpu, memory, cpu->pc);
                     printf("\nPress enter key to continue...");
-                    //stdinFlush();
+                    /*NOTE this is not standard and not portable, if this is
+                     *causing the program to not compile try replacing it with 
+                     *fflush(stdin)*/
+                    fpurge(stdin);
                     getchar();
                     
                 }
