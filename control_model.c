@@ -4,6 +4,7 @@
 #include "load_store_op.h"
 #include "jumps_model.h"
 #include "io_controller_model.h"
+#include "trap_commands.h"
 
 //Gets the opcode out of the instruction.
 int getOperation(Register ir){
@@ -448,8 +449,17 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
                                     //HALT
                                     *halt_ptr = 1;
                                     break;
+                                case GETC:
+                                    getch(keyboard_io, cpu);
+                                    break;
+                                case PUTC:
+                                    putch(monitor_io, cpu);
+                                    break;
                                 case GETS:
-                                    getstringtrap(keyboard_io, cpu, memory);
+                                    getst(keyboard_io, cpu, memory);
+                                    break;
+                                case PUTS:
+                                    putst(monitor_io, cpu, memory);
                                     break;
                                 default:
                                     break;

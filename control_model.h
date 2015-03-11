@@ -5,8 +5,11 @@
 #include "mem_model.h"
 #include "io_controller_model.h"
 
-#define HALT 32
-#define GETS 22
+#define HALT 0x32
+#define GETC 0x20
+#define PUTC 0x21
+#define GETS 0x22
+#define PUTS 0x23
 
 
 //Prototypes for control.h.
