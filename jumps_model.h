@@ -24,6 +24,9 @@ void brZ(int pc_location, CPU_p cpu);
 void brC(int pc_location, CPU_p cpu);
 void brO(int pc_location, CPU_p cpu);
 
+void trapPush(CPU_p cpu, Memory_p memory);
+void trapPop(CPU_p cpu, Memory_p memory);
+
 //Helper prototypes for the jump model.
 void stpc(int ra_location, CPU_p cpu, Memory_p memory);
 void ldpc(int ra_location, CPU_p cpu, Memory_p memory);

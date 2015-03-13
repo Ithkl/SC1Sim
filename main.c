@@ -78,7 +78,11 @@ int main() {
         free(memory);
 	memory = NULL;
 	free(cpu);
-	cpu = NULL;
+        cpu = NULL;
+        free(keyboard_io);
+        keyboard_io = NULL;
+        free(monitor_io);
+        monitor_io = NULL;
 	return EXIT_SUCCESS;
 }
 

@@ -258,6 +258,9 @@ void decode(int * opcode_ptr, int * rd_loc_ptr, int * ra_loc_ptr, int * rx_loc_p
 		case JMP:
 			*rx_loc_ptr = decodeRxAndImmd3(cpu->ir);
 			break;
+                case JSR:
+                        *rx_loc_ptr = decodeRxAndImmd3(cpu->ir);
+                    break;
 		case RET:
                     //Get Argument bits and immediate.
                     *args_ptr = decodeArgument2(cpu->ir);
@@ -440,10 +443,14 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
 		case JMP:
 			jmp(rx_loc, cpu, memory);
 			break;
+                case JSR:
+                    jsr(rx_loc, cpu, memory);
+                    break;
                         //Executes return or halt.
 		case RET:
                         //If the argument bits are set, go to trap.
 			if (args) {
+                            trapPush(cpu, memory);
                             switch (immediate) {
                                 case HALT:
                                     //HALT
@@ -464,6 +471,7 @@ void execute(int opcode,int rd_loc, int ra_loc, int rx_loc, int args, int immedi
                                 default:
                                     break;
                             }
+                            trapPop(cpu, memory);
 			}
                         //Return.
 			else {

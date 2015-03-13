@@ -72,6 +72,7 @@ void command_prompt(int * fileState_ptr, int * executeState_ptr, unsigned short 
         //Exits the prompt if the user requests to.
 	case COMMAND_EXIT:
 		*executeState_ptr = EXIT_STATE;
+                break;
 	default:
 		break;
 	}
