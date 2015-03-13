@@ -57,7 +57,7 @@ void getst(Io_monitor_p keyboard_io, CPU_p cpu, Memory_p memory){
                                         }
                                         //if we just wrote a carrage return,
                                         //get out of the while loop
-                                        if(currentCharacter = CARRAGE_RETURN){
+                                        if(currentCharacter == CARRAGE_RETURN){
                                             break;
                                         }
                                         //get the next character in stdin.

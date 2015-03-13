@@ -11,7 +11,7 @@
 //Also 14 bytes of memory around the dump location.
 void display(CPU_p cpu, Memory_p memory, unsigned short dump_location) {
     int i = 0;
-    system("clear");
+    //system("clear");
     printf("\nRegisters                                  Memory");
     //Printing out the register file and 14 memory addresses.
     for (i;i < 8; i++)
@@ -42,7 +42,8 @@ void command_prompt(int * fileState_ptr, int * executeState_ptr, unsigned short 
                 break;
         
         }
-        printf("\n>");    
+        printf("\n>");  
+        fpurge(stdin);
 	scanf("%d",&command);
         getchar();  //Eat the \n left by the scanf
 	switch (command)
